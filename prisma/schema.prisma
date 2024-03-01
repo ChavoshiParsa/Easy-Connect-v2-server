@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String
+  lastName       String
+  profileUrl     String
+  biography      String
+  username       String   @unique
+  email          String   @unique
+  password       String
+  theme          Theme
+  unreadMessages Int      @default(0)
+  isOnline       Boolean  @default(false)
+  lastSeen       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  chats          Chat[]
+}
+
+model Chat {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  sender      User      @relation(fields: [senderId], references: [id])
+  senderId    String    @db.ObjectId
+  receiverId  String    @db.ObjectId
+  newMessages Int       @default(0)
+  messages    Message[]
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String   @db.ObjectId
+  text      String
+  createdAt DateTime @default(now())
+  status    Status
+}
+
+enum Status {
+  seen
+  sent
+}
+
+enum Theme {
+  red
+  orange
+  amber
+  yellow
+  lime
+  green
+  emerald
+  teal
+  cyan
+  sky
+  blue
+  indigo
+  violet
+  purple
+  fuchsia
+  pink
+  rose
+}
