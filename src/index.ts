@@ -47,6 +47,7 @@ io.on("connection", (socket) => {
       where: { id: userId },
       data: { isOnline: true },
     });
+    socket.broadcast.emit("online", userId);
     activeUsers.setUser(userId, socket.id);
 
     console.log(activeUsers.users);
@@ -64,6 +65,7 @@ io.on("connection", (socket) => {
       where: { id: userId },
       data: { isOnline: false },
     });
+    socket.broadcast.emit("offline", userId);
     activeUsers.deleteUser(socket.id);
     console.log(activeUsers.users);
   });
