@@ -43,12 +43,13 @@ const activeUsers: ActiveUsers = {
 
 io.on("connection", (socket) => {
   socket.on("join", async (userId) => {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isOnline: true },
-    });
     socket.broadcast.emit("online", userId);
     activeUsers.setUser(userId, socket.id);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isOnline: true, lastSeen: Date.now().toString() },
+    });
 
     console.log(activeUsers.users);
   });
@@ -59,14 +60,24 @@ io.on("connection", (socket) => {
       socket.broadcast.to(receiverSocketId).emit("activity", senderId);
   });
 
+  socket.on("message", ({ senderId, receiverId, message }) => {
+    const receiverSocketId = activeUsers.findSocketId(receiverId);
+    if (receiverSocketId)
+      socket.broadcast
+        .to(receiverSocketId)
+        .emit("message", { senderId, message });
+  });
+
   socket.on("disconnect", async () => {
     const userId = activeUsers.findUserId(socket.id);
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isOnline: false },
-    });
     socket.broadcast.emit("offline", userId);
     activeUsers.deleteUser(socket.id);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isOnline: false, lastSeen: Date.now().toString() },
+    });
+
     console.log(activeUsers.users);
   });
 });

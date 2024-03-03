@@ -19,7 +19,7 @@ model User {
   theme          Theme
   unreadMessages Int      @default(0)
   isOnline       Boolean  @default(false)
-  lastSeen       DateTime @default(now())
+  lastSeen       String
   createdAt      DateTime @default(now())
   chats          Chat[]
 }
