@@ -68,6 +68,13 @@ io.on("connection", (socket) => {
         .emit("message", { senderId, message });
   });
 
+  socket.on("seenMessage", (receiverId) => {
+    const receiverSocketId = activeUsers.findSocketId(receiverId);
+    const viewerId = activeUsers.findUserId(socket.id);
+    if (receiverSocketId)
+      socket.broadcast.to(receiverSocketId).emit("seenMessage", viewerId);
+  });
+
   socket.on("disconnect", async () => {
     const userId = activeUsers.findUserId(socket.id);
     socket.broadcast.emit("offline", userId);
