@@ -1,7 +1,7 @@
-const express = require("express");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const { prisma } = require("../prisma/prisma");
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import { prisma } from "../prisma/prisma";
 
 const app = express();
 const server = createServer(app);
@@ -41,8 +41,8 @@ const activeUsers: ActiveUsers = {
   },
 };
 
-io.on("connection", (socket: any) => {
-  socket.on("join", async (userId: string) => {
+io.on("connection", (socket) => {
+  socket.on("join", async (userId) => {
     socket.broadcast.emit("online", userId);
     activeUsers.setUser(userId, socket.id);
 
@@ -54,35 +54,21 @@ io.on("connection", (socket: any) => {
     console.log(activeUsers.users);
   });
 
-  socket.on(
-    "activity",
-    ({ senderId, receiverId }: { senderId: string; receiverId: string }) => {
-      const receiverSocketId = activeUsers.findSocketId(receiverId);
-      if (receiverSocketId)
-        socket.broadcast.to(receiverSocketId).emit("activity", senderId);
-    }
-  );
+  socket.on("activity", ({ senderId, receiverId }) => {
+    const receiverSocketId = activeUsers.findSocketId(receiverId);
+    if (receiverSocketId)
+      socket.broadcast.to(receiverSocketId).emit("activity", senderId);
+  });
 
-  socket.on(
-    "message",
-    ({
-      senderId,
-      receiverId,
-      message,
-    }: {
-      senderId: string;
-      receiverId: string;
-      message: string;
-    }) => {
-      const receiverSocketId = activeUsers.findSocketId(receiverId);
-      if (receiverSocketId)
-        socket.broadcast
-          .to(receiverSocketId)
-          .emit("message", { senderId, message });
-    }
-  );
+  socket.on("message", ({ senderId, receiverId, message }) => {
+    const receiverSocketId = activeUsers.findSocketId(receiverId);
+    if (receiverSocketId)
+      socket.broadcast
+        .to(receiverSocketId)
+        .emit("message", { senderId, message });
+  });
 
-  socket.on("seen", (receiverId: string) => {
+  socket.on("seen", (receiverId) => {
     const receiverSocketId = activeUsers.findSocketId(receiverId);
     const viewerId = activeUsers.findUserId(socket.id);
     if (receiverSocketId)
