@@ -8,15 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const express = require("express");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const { prisma } = require("../prisma/prisma");
-const app = express();
-const server = createServer(app);
-const io = new Server(server, {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const http_1 = require("http");
+const socket_io_1 = require("socket.io");
+const prisma_1 = require("../prisma/prisma");
+const app = (0, express_1.default)();
+const server = (0, http_1.createServer)(app);
+const io = new socket_io_1.Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://easy-connect-v2.vercel.app",
     },
 });
 const activeUsers = {
@@ -41,7 +45,7 @@ io.on("connection", (socket) => {
     socket.on("join", (userId) => __awaiter(void 0, void 0, void 0, function* () {
         socket.broadcast.emit("online", userId);
         activeUsers.setUser(userId, socket.id);
-        yield prisma.user.update({
+        yield prisma_1.prisma.user.update({
             where: { id: userId },
             data: { isOnline: true, lastSeen: Date.now().toString() },
         });
@@ -52,7 +56,7 @@ io.on("connection", (socket) => {
         if (receiverSocketId)
             socket.broadcast.to(receiverSocketId).emit("activity", senderId);
     });
-    socket.on("message", ({ senderId, receiverId, message, }) => {
+    socket.on("message", ({ senderId, receiverId, message }) => {
         const receiverSocketId = activeUsers.findSocketId(receiverId);
         if (receiverSocketId)
             socket.broadcast
@@ -69,7 +73,7 @@ io.on("connection", (socket) => {
         const userId = activeUsers.findUserId(socket.id);
         socket.broadcast.emit("offline", userId);
         activeUsers.deleteUser(socket.id);
-        yield prisma.user.update({
+        yield prisma_1.prisma.user.update({
             where: { id: userId },
             data: { isOnline: false, lastSeen: Date.now().toString() },
         });
