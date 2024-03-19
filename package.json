@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
-  "type": "module",
   "scripts": {
-    "build": "npx tsc",
+    "build": "prisma generate && npx tsc",
+    "postinstall": "prisma generate",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts"
   },
