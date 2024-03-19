@@ -68,11 +68,11 @@ io.on("connection", (socket) => {
         .emit("message", { senderId, message });
   });
 
-  socket.on("seenMessage", (receiverId) => {
+  socket.on("seen", (receiverId) => {
     const receiverSocketId = activeUsers.findSocketId(receiverId);
     const viewerId = activeUsers.findUserId(socket.id);
     if (receiverSocketId)
-      socket.broadcast.to(receiverSocketId).emit("seenMessage", viewerId);
+      socket.broadcast.to(receiverSocketId).emit("seen", viewerId);
   });
 
   socket.on("disconnect", async () => {
