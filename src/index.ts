@@ -5,9 +5,15 @@ import { prisma } from "../prisma/prisma";
 
 const app = express();
 const server = createServer(app);
+
+const socketIoOrigin =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : process.env.FRONT_END_URL;
+
 const io = new Server(server, {
   cors: {
-    origin: "https://easy-connect-v2.vercel.app",
+    origin: String(socketIoOrigin),
   },
 });
 
